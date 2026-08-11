@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sign in — Project RUNWAY</title>
+<link rel="stylesheet" href="/app.css" />
+<link rel="icon" href="data:," />
+</head>
+<body>
+<main class="auth">
+  <form class="auth__card glass" id="form" novalidate>
+    <h1 class="auth__title">Project RUNWAY</h1>
+    <p class="auth__sub">Schools Division of Sipalay City — Sign in</p>
+
+    <div class="alert alert--error" id="alert" hidden></div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input class="input" type="email" id="email" required autocomplete="username" placeholder="you@deped.gov.ph" />
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input class="input" type="password" id="password" required autocomplete="current-password" placeholder="••••••••••" />
+    </div>
+
+    <button class="btn btn--primary" type="submit" id="submit" style="width:100%;margin-top:0.5rem">
+      Sign in
+    </button>
+  </form>
+</main>
+
+<script>
+  const form = document.getElementById('form');
+  const alertBox = document.getElementById('alert');
+  const submit = document.getElementById('submit');
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    alertBox.hidden = true;
+    submit.disabled = true;
+    submit.textContent = 'Signing in…';
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('email').value.trim(),
+          password: document.getElementById('password').value,
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+
+      if (!res.ok) throw new Error(body?.error?.message || 'Sign in failed');
+      window.location.href = body.data.mustChangePassword ? '/change-password' : '/';
+    } catch (err) {
+      alertBox.textContent = err.message;
+      alertBox.hidden = false;
+      submit.disabled = false;
+      submit.textContent = 'Sign in';
+    }
+  });
+</script>
+</body>
+</html>
